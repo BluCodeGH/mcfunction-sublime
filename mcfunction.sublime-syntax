@@ -18,7 +18,7 @@ variables:
   name: \s+([^ \n]++)
   string: \s+.+
   selector: \s+(@[aeprs](?:\[[^\]]*\])?+)
-  coord: \s+(~?(?:[+-]?\d+(?:\.\d+)?)?)
+  coord: \s+(~|~[+-]?\d+(?:\.\d+)?|[+-]?\d+(?:\.\d+)?)
   coords: (?:\s+(\^?~?(?:[+-]?\d+(?:\.\d+)?)?)){3}
   start: (?:^|\s+)
   end: .*\n
@@ -728,7 +728,7 @@ contexts:
     - include: incomplete
 
   selector:
-    - match: \G\s+@[aeprs](\[)
+    - match: \s+@[aeprs](\[)
       scope: punctuation.definition.keyword
       captures:
         1: punctuation.section.brackets.begin
@@ -741,7 +741,7 @@ contexts:
           pop: true
         - match: ','
           scope: punctuation.separator.selector
-        - match: (type)(=!?)([a-z_:])
+        - match: (type)(=!?)([a-z_:]+)
           captures:
             1: keyword.control
             2: keyword.operator
@@ -761,7 +761,7 @@ contexts:
             1: keyword.control
             2: keyword.operator
             3: constant.numeric
-        - match: (c)(=!?){{int}}
+        - match: (c)(=!?){{_int}}
           captures:
             1: keyword.control
             2: keyword.operator
@@ -797,8 +797,8 @@ contexts:
             - match: \s+
         - include: incomplete
         - match: \s+
-    - match: \G\s+@[aeprs]
-      scope: punctuation.definition.keyword
+    - match: \s+@[aeprs]
+      scope: punctuation.definition.keyword2
       pop: true
     - include: incomplete
 
