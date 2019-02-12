@@ -1,0 +1,24 @@
+%YAML 1.2
+---
+name: Obsidian
+file_extensions: [cmds]
+scope: source
+
+contexts:
+  main:
+    - match: ^\s*((#).*)$
+      captures:
+        1: comment.line
+        2: punctuation.definition.comment
+    - match: \G\s+(-?\??-?)(?:(.*?)(\|))?
+      captures:
+        1: keyword.operator
+        2: string.unquoted
+        3: keyword.operator
+      embed: Packages/mcfunction-sublime/mcfunction.sublime-syntax
+      escape: \z
+    - match: \G([RIC])((?:\s+~?[+-]?\d*(?:\.\d+)?){3})\s+(u|d|\+x|\+z|-x|-z)
+      captures:
+        1: keyword.control
+        2: constant.numeric
+        3: keyword.control

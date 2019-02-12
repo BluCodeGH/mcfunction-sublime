@@ -20,7 +20,7 @@ variables:
   selector: \s+(@[aeprs](?:\[[^\]]*\])?+)
   coord: \s+(~|~[+-]?\d+(?:\.\d+)?|[+-]?\d+(?:\.\d+)?)
   coords: (?:\s+(\^?~?(?:[+-]?\d+(?:\.\d+)?)?)){3}
-  start: (?:^|\s+)
+  start: (?:\G|^|\s+)
   end: .*\n
 
 contexts:
@@ -34,7 +34,7 @@ contexts:
       captures:
         1: comment.line
         2: punctuation.definition.comment
-    - match: ^\s*(?=\S)
+    - match: \s*(?=\S)
       embed: command
       escape: \z
 
