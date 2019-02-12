@@ -1,0 +1,815 @@
+%YAML 1.2
+---
+name: MC Function
+file_extensions: [mcfunction]
+scope: source
+
+variables:
+  bool: \s+(true|false)
+  _whole: (\+?\d+)
+  whole: \s+{{_whole}}
+  _dv: (-1|{{_whole}})
+  dv: \s+{{_dv}}
+  _int: ([+-]?\d+)
+  int: \s+{{_int}}
+  _float: ([+-]?\d+(?:\.\d+)?)
+  float: \s+{{_float}}
+  block: \s+([a-z_]+)
+  name: \s+([^ \n]++)
+  string: \s+.+
+  selector: \s+(@[aeprs](?:\[[^\]]*\])?+)
+  coord: \s+(~?(?:[+-]?\d+(?:\.\d+)?)?)
+  coords: (?:\s+(\^?~?(?:[+-]?\d+(?:\.\d+)?)?)){3}
+  start: (?:^|\s+)
+  end: .*\n
+
+contexts:
+  incomplete:
+    - match: .*(\n)$
+      captures: 
+        1: invalid.illegal.blank
+
+  main:
+    - match: ^\s*((#).*)$
+      captures:
+        1: comment.line
+        2: punctuation.definition.comment
+    - match: ^\s*(?=\S)
+      embed: command
+      escape: \z
+
+  command:
+    - match: "{{start}}alwaysday"
+      scope: variable.function
+      set: command_alwaysday
+    - match: "{{start}}clear"
+      scope: variable.function
+      set: command_clear
+    - match: "{{start}}clone"
+      scope: variable.function
+      set: command_clone
+    - match: "{{start}}daylock"
+      scope: variable.function
+      set: command_alwaysday
+    - match: "{{start}}difficulty"
+      scope: variable.function
+      set: command_difficulty
+    - match: "{{start}}effect"
+      scope: variable.function
+      set: command_effect
+    - match: "{{start}}enchant"
+      scope: variable.function
+      set: command_enchant
+    - match: "{{start}}execute"
+      scope: variable.function
+      set: command_execute
+    - match: "{{start}}fill"
+      scope: variable.function
+      set: command_fill
+    - match: "{{start}}function"
+      scope: variable.function
+      set: command_function
+    - match: "{{start}}gamemode"
+      scope: variable.function
+      set: command_gamemode
+    - match: "{{start}}gamerule"
+      scope: variable.function
+      set: command_gamerule
+    - match: "{{start}}give"
+      scope: variable.function
+      set: command_give
+    - match: "{{start}}kill"
+      scope: variable.function
+      set: command_kill
+    - match: "{{start}}me"
+      scope: variable.function
+      set: command_me
+    - match: "{{start}}msg"
+      scope: variable.function
+      set: command_tell
+    - match: "{{start}}particle"
+      scope: variable.function
+      set: command_particle
+    - match: "{{start}}playsound"
+      scope: variable.function
+      set: command_playsound
+    - match: "{{start}}replaceitem"
+      scope: variable.function
+      set: command_replaceitem
+    - match: "{{start}}say"
+      scope: variable.function
+      set: command_say
+    - match: "{{start}}scoreboard"
+      scope: variable.function
+      set: command_scoreboard
+    - match: "{{start}}setblock"
+      scope: variable.function
+      set: command_setblock
+    - match: "{{start}}spawnpoint"
+      scope: variable.function
+      set: command_spawnpoint
+    - match: "{{start}}spreadplayers"
+      scope: variable.function
+      set: command_spreadplayers
+    - match: "{{start}}stopsound"
+      scope: variable.function
+      set: command_stopsound
+    - match: "{{start}}summon"
+      scope: variable.function
+      set: command_summon
+    - match: "{{start}}tag"
+      scope: variable.function
+      set: command_tag
+    - match: "{{start}}(teleport|tp)"
+      scope: variable.function
+      set: command_teleport
+    - match: "{{start}}tellraw"
+      scope: variable.function
+      set: command_tellraw
+    - match: "{{start}}tell"
+      scope: variable.function
+      set: command_tell
+    - match: "{{start}}testforblocks"
+      scope: variable.function
+      set: command_testforblocks
+    - match: "{{start}}testforblock"
+      scope: variable.function
+      set: command_testforblock
+    - match: "{{start}}testfor"
+      scope: variable.function
+      set: command_testfor
+    - match: "{{start}}tickingarea"
+      scope: variable.function
+      set: command_tickingarea
+    - match: "{{start}}time"
+      scope: variable.function
+      set: command_time
+    - match: "{{start}}titleraw"
+      scope: variable.function
+      set: command_titleraw
+    - match: "{{start}}title"
+      scope: variable.function
+      set: command_title
+    - match: "{{start}}toggledownfall"
+      scope: variable.function
+      set: command_toggledownfall
+    - match: "{{start}}weather"
+      scope: variable.function
+      set: command_weather
+    - match: "{{start}}w"
+      scope: variable.function
+      set: command_tell
+    - match: "{{start}}xp"
+      scope: variable.function
+      set: command_xp
+    - match: "{{start}}(.+)"
+      captures: 
+        1: invalid.illegal.unknown
+
+  end:
+    - match: \G\n$
+      pop: true
+    - match: \G(.*)\n$
+      captures: 
+        1: invalid.illegal.should_end
+      pop: true
+
+  command_mandatory:
+    - include: command
+    - include: incomplete
+
+  command_alwaysday:
+    - match: (?=\s{{end}})
+      set: [ end, bool ]
+    - match: (?={{end}})
+      set: end
+    - include: incomplete
+    
+  command_clear:
+    - match: \G(?={{selector}}{{name}}{{dv}}.{{end}})
+      set: [ end, dv, dv, name, selector ]
+    - match: \G(?={{selector}}{{name}}.{{end}})
+      set: [ end, dv, name, selector ]
+    - match: \G(?={{selector}}.{{end}})
+      set: [ end, name, selector ]
+    - match: \G(?=.{{end}})
+      set: [ end, selector ]
+    - match: \G{{end}}
+      pop: true
+      
+  command_clone:
+    - match: \G(?={{coords}}{{coords}}{{coords}}\s+filtered{{end}})
+      set: [ end, dv, name, command_clone_type_2, command_clone_type_1, coords, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{coords}}\s+(replace|masked)\s{{end}})
+      set: [ end, command_clone_type_2, command_clone_type_1, coords, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{coords}}\s{{end}})
+      set: [ end, command_clone_type_1, coords, coords, coords ]
+    - match: \G(?={{end}})
+      set: [ end, coords, coords, coords ]
+    - include: incomplete
+
+  command_clone_type_1:
+    - match: \G\s+(replace|masked|filtered)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_clone_type_2:
+    - match: \G\s+(normal|move|force)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_difficulty:
+    - match: \G(?=\s+([0-3]|p|peaceful|e|easy|n|normal|h|hard){{end}})
+      set: [ end, command_difficulty_type ]
+    - include: incomplete
+
+  command_difficulty_type:
+    - match: \G\s+([0-3]|peaceful|p|easy|e|normal|n|hard|h)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_effect:
+    - match: \G(?={{selector}}{{name}}{{whole}}{{whole}}\s{{end}})
+      set: [ end, bool, whole, whole, name, selector ]
+    - match: \G(?={{selector}}{{name}}{{whole}}\s{{end}})
+      set: [ end, whole, whole, name, selector ]
+    - match: \G(?={{selector}}{{name}}\s{{end}})
+      set: [ end, whole, name, selector ]
+    - match: \G(?={{end}})
+      set: [ end, name, selector ]
+    - include: incomplete
+
+  command_enchant:
+    - match: \G(?={{selector}}{{whole}}\s{{end}})
+      set: [ end, whole, whole, selector ]
+    - match: \G(?={{selector}}{{name}}\s{{end}})
+      set: [ end, whole, name, selector ]
+    - match: \G(?={{selector}}{{whole}}{{end}})
+      set: [ end, whole, selector ]
+    - match: \G(?={{end}})
+      set: [ end, name, selector ]
+    - include: incomplete
+
+  command_execute:
+    - match: \G(?={{selector}}{{coords}}\s+detect{{end}})
+      set: [ command_mandatory, dv, name, coords, keyword, coords, selector ]
+    - match: \G(?=.{{end}})
+      set: [ command_mandatory, coords, selector ]
+    - include: incomplete
+
+  command_fill:
+    - match: \G(?={{coords}}{{coords}}{{coords}}{{name}}{{dv}}\s{{end}})
+      set: [ end, command_fill_type, dv, name, coords, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{coords}}{{name}}\s{{end}})
+      set: [ end, dv, name, coords, coords, coords ]
+    - match: \G(?={{end}})
+      set: [ end, name, coords, coords, coords ]
+    - include: incomplete
+
+  command_fill_type:
+    - match: \G\s+(destroy|hollow|keep|outline|replace)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_function:
+    - match: \G(?={{end}})
+      set: [ end, name ]
+    - include: incomplete
+
+  command_gamemode:
+    - match: \G(?=\s+([0-2]|creative|c|survival|s|adventure|a)\s{{end}})
+      set: [ end, selector, command_gamemode_type ]
+    - match: \G(?={{end}})
+      set: [ end, command_gamemode_type ]
+    - include: incomplete
+
+  command_gamemode_type:
+    - match: \G\s+(?:([0-2])|creative|c|survival|s|adventure|a)
+      scope: keyword.control
+      captures:
+        1: constant.numeric
+      pop: true
+    - include: incomplete
+
+  command_gamerule:
+    - match: \G(?={{name}}\s{{end}})
+      set: [ end, bool, name ]
+    - match: \G(?={{end}})
+      set: [ end, name ]
+    - include: incomplete
+
+  command_give:
+    - match: \G(?={{selector}}{{name}}{{whole}}{{dv}}\s{{end}})
+      set: [ end, name, dv, whole, name, selector ]
+    - match: \G(?={{selector}}{{name}}{{whole}}\s{{end}})
+      set: [ end, dv, whole, name, selector ]
+    - match: \G(?={{selector}}{{name}}\s{{end}})
+      set: [ end, whole, name, selector ]
+    - match: \G(?={{end}})
+      set: [ end, name, selector ]
+    - include: incomplete
+
+  command_kill:
+    - match: \G(?=\s{{end}})
+      set: [ end, selector ]
+    - match: \G(?={{end}})
+      set: [ end ]
+    - include: incomplete
+
+  command_me:
+    - match: \G\s+.{{end}}
+      scope: string.unquoted
+    - include: incomplete
+
+  command_particle:
+    - match: \G(?={{end}})
+      set: [ end, coords, name ]
+    - include: incomplete
+
+  command_playsound:
+    - match: \G(?={{name}}{{selector}}{{coords}}{{float}}{{float}}\s{{end}})
+      set: [ end, float, float, float, coords, selector, name ]
+    - match: \G(?={{name}}{{selector}}{{coords}}{{float}}\s{{end}})
+      set: [ end, float, float, coords, selector, name ]
+    - match: \G(?={{name}}{{selector}}{{coords}}\s{{end}})
+      set: [ end, float, coords, selector, name ]
+    - match: \G(?={{name}}{{selector}}\s{{end}})
+      set: [ end, coords, selector, name ]
+    - match: \G(?={{name}}\s{{end}})
+      set: [ end, selector, name ]
+    - match: \G(?={{end}})
+      set: [ end, name ]
+    - include: incomplete
+
+  command_replaceitem:
+    - match: \G(?=\s+entity{{selector}}{{name}}{{whole}}{{name}}{{whole}}{{dv}}\s{{end}})
+      set: [ end, name, dv, whole, name, whole, command_replaceitem_type, selector, keyword ]
+    - match: \G(?=\s+entity{{selector}}{{name}}{{whole}}{{name}}{{whole}}\s{{end}})
+      set: [ end, dv, whole, name, whole, command_replaceitem_type, selector, keyword ]
+    - match: \G(?=\s+entity{{selector}}{{name}}{{whole}}{{name}}\s{{end}})
+      set: [ end, whole, name, whole, command_replaceitem_type, selector, keyword ]
+    - match: \G(?=\s+entity{{end}})
+      set: [ end, name, whole, command_replaceitem_type, selector, keyword ]
+    - match: \G(?=\s+block{{coords}}\s+slot.container{{whole}}{{name}}{{whole}}{{dv}}\s{{end}})
+      set: [ end, name, dv, whole, name, whole, keyword, coords, keyword ]
+    - match: \G(?=\s+block{{coords}}\s+slot.container{{whole}}{{name}}{{whole}}\s{{end}})
+      set: [ end, dv, whole, name, whole, keyword, coords, keyword ]
+    - match: \G(?=\s+block{{coords}}\s+slot.container{{whole}}{{name}}\s{{end}})
+      set: [ end, whole, name, whole, keyword, coords, keyword ]
+    - match: \G(?=\s+block{{coords}}\s+slot.container{{end}})
+      set: [ end, name, whole, keyword, coords, keyword ]
+    - match: \G(?=\s+block{{end}})
+      set: [ incomplete, coords, keyword ]
+    - include: incomplete
+
+  command_replaceitem_type:
+    - match: \G\s+slot\.(armor(\.(chest|feet|head|legs))?|chest|enderchest|hotbar|inventory|saddle|weapon\.mainhand|weapon\.offhand)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_say:
+    - match: \G\s+.{{end}}
+      scope: string.unquoted
+    - include: incomplete
+
+  command_scoreboard:
+    - match: \G(?=\s+objectives\s+setdisplay\s+(list|sidebar){{name}}\s+(ascending|descending){{end}})
+      set: [ end, keyword, name, keyword, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+setdisplay\s+(list|sidebar){{name}}\s{{end}})
+      set: [ incomplete, name, keyword, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+setdisplay\s+(list|sidebar|belowname)\s{{end}})
+      set: [ end, name, keyword, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+setdisplay\s+(list|sidebar|belowname){{end}})
+      set: [ end, keyword, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+setdisplay{{end}})
+      set: [ incomplete, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+list{{end}})
+      set: [ end, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+remove{{end}})
+      set: [ end, name, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+add{{name}}\s+dummy\s{{end}})
+      set: [ end, name, keyword, name, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+add{{name}}\s+dummy{{end}})
+      set: [ end, keyword, name, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives\s+add{{end}})
+      set: [ incomplete, name, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+objectives{{end}})
+      set: [ incomplete, command_scoreboard_type_4, keyword ]
+    - match: \G(?=\s+players\s+operation{{end}})
+      set: [ end, name, selector, command_scoreboard_type_3, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+(add|remove|set){{end}})
+      set: [ end, int, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+random{{end}})
+      set: [ end, int, int, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+test{{selector}}{{name}}\s+(\*|{{_int}})\s+{{end}})
+      set: [ end, command_scoreboard_type_2, command_scoreboard_type_2, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+test{{end}})
+      set: [ end, command_scoreboard_type_2, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+reset{{selector}}\s{{end}})
+      set: [ end, name, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+reset{{end}})
+      set: [ end, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+list\s+{{end}})
+      set: [ end, selector, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+list{{end}})
+      set: [ end, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players{{end}})
+      set: [ incomplete, command_scoreboard_type_1, keyword ]
+    - include: incomplete
+
+  command_scoreboard_type_1:
+    - match: \G\s+(list|reset|test|random|add|remove|set|operation)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_scoreboard_type_2:
+    - match: \G\s+(\*|{{_int}})
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  command_scoreboard_type_3:
+    - match: \G\s+(%=|\*=|\+=|\-=|/=|<|>|=|><)
+      scope: keyword.operator
+      pop: true
+    - include: incomplete
+
+  command_scoreboard_type_4:
+    - match: \G\s+(add|remove|list|setdisplay)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_setblock:
+    - match: \G(?={{coords}}{{name}}{{dv}}\s{{end}})
+      set: [ end, command_setblock_type, dv, name, coords ]
+    - match: \G(?={{coords}}{{name}}\s{{end}})
+      set: [ end, dv, name, coords ]
+    - match: \G(?={{end}})
+      set: [ end, name, coords ]
+    - include: incomplete
+
+  command_setblock_type:
+    - match: \G\s+(replace|destroy|keep)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_spawnpoint:
+    - match: \G(?={{selector}}\s{{end}})
+      set: [ end, coords, selector ]
+    - match: \G(?=\s{{end}})
+      set: [ end, selector ]
+    - match: \G(?={{end}})
+      set: [ end ]
+    - include: incomplete
+
+  command_spreadplayers:
+    - match: \G(?={{end}})
+      set: [ end, selector, float, float, coord, coord ]
+    - include: incomplete
+
+  command_stopsound:
+    - match: \G(?={{selector}}\s{{end}})
+      set: [ end, name, selector ]
+    - match: \G(?={{end}})
+      set: [ end, selector ]
+    - include: incomplete
+
+  command_summon:
+    - match: \G(?={{name}}\s{{end}})
+      set: [ end, coords, name ]
+    - match: \G(?={{end}})
+      set: [ end, name ]
+    - include: incomplete
+
+  command_tag:
+    - match: \G(?={{selector}}\s+(add|remove){{end}})
+      set: [ end, name, keyword, selector ]
+    - match: \G(?={{selector}}\s+list{{end}})
+      set: [ end, keyword, selector ]
+    - match: \G(?={{end}})
+      set: [ incomplete, selector ]
+    - include: incomplete
+
+  command_teleport:
+    - match: \G(?={{coords}}{{float}}\s{{end}})
+      set: [ end, float, float, coords ]
+    - match: \G(?={{coords}}{{float}}{{end}})
+      set: [ end, float, coords ]
+    - match: \G(?={{coords}}\s+facing{{coords}}{{end}})
+      set: [ end, coords, keyword, coords ]
+    - match: \G(?={{coords}}\s+facing{{selector}}{{end}})
+      set: [ end, selector, keyword, coords ]
+    - match: \G(?={{coords}}\s+facing{{end}})
+      set: [ incomplete, keyword, coords ]
+    - match: \G(?={{coords}}\s{{end}})
+      set: [ incomplete, coords ]
+    - match: \G(?={{coords}}{{end}})
+      set: [ end, coords ]
+    - match: \G(?={{selector}}{{coords}}{{float}}\s{{end}})
+      set: [ end, float, float, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}{{float}}{{end}})
+      set: [ end, float, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}\s+facing{{coords}}{{end}})
+      set: [ end, coords, keyword, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}\s+facing{{selector}}{{end}})
+      set: [ end, selector, keyword, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}\s+facing{{end}})
+      set: [ incomplete, keyword, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}\s{{end}})
+      set: [ incomplete, coords, selector ]
+    - match: \G(?={{selector}}{{coords}}{{end}})
+      set: [ end, coords, selector ]
+    - match: \G(?={{selector}}{{selector}}{{end}})
+      set: [ end, selector, selector ]
+    - match: \G(?={{selector}}\s{{end}})
+      set: [ incomplete, selector ]
+    - match: \G(?={{selector}}{{end}})
+      set: [ end, selector ]
+    - include: incomplete
+
+  command_tell:
+    - match: \G(?={{end}})
+      set: [ end, string, selector ]
+    - include: incomplete
+
+  command_tellraw:
+    - match: \G(?={{end}})
+      set: [ end, string, selector ]
+    - include: incomplete
+
+  command_testfor:
+    - match: \G(?={{end}})
+      set: [ end, selector ]
+    - include: incomplete
+
+  command_testforblock:
+    - match: \G(?={{coords}}{{name}}\s{{end}})
+      set: [ end, dv, name, coords ]
+    - match: \G(?={{end}})
+      set: [ end, name, coords ]
+    - include: incomplete
+
+  command_testforblocks:
+    - match: \G(?={{coords}}{{coords}}{{coords}}\s+(masked|all){{end}})
+      set: [ end, keyword, coords, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{coords}}\s{{end}})
+      set: [ incomplete, coords, coords, coords ]
+    - match: \G(?={{end}})
+      set: [ end, coords, coords, coords ]
+    - include: incomplete
+
+  command_tickingarea:
+    - match: \G(?=\s+list\s+all-dimensions{{end}})
+      set: [ end, keyword, command_tickingarea_type ]
+    - match: \G(?=\s+list\s{{end}})
+      set: [ incomplete, command_tickingarea_type ]
+    - match: \G(?=\s+list{{end}})
+      set: [ end, command_tickingarea_type ]
+    - match: \G(?=\s+remove_all{{end}})
+      set: [ end, command_tickingarea_type ]
+    - match: \G(?=\s+remove{{coords}}{{end}})
+      set: [ end, coords, command_tickingarea_type ]
+    - match: \G(?=\s+remove{{name}}{{end}})
+      set: [ end, name, command_tickingarea_type ]
+    - match: \G(?=\s+add\s+circle{{coords}}{{whole}}\s{{end}})
+      set: [ end, name, whole, coords, keyword, command_tickingarea_type ]
+    - match: \G(?=\s+add\s+circle\s{{end}})
+      set: [ end, whole, coords, keyword, command_tickingarea_type ]
+    - match: \G(?=\s+add\s+circle{{end}})
+      set: [ incomplete, keyword, command_tickingarea_type ]
+    - match: \G(?=\s+add{{coords}}{{coords}}\s{{end}})
+      set: [ end, name, coords, coords, command_tickingarea_type ]
+    - match: \G(?=\s+add{{coords}}{{end}})
+      set: [ end, coords, coords, command_tickingarea_type ]
+    - match: \G(?={{end}})
+      set: [ incomplete, command_tickingarea_type ]
+    - include: incomplete
+
+  command_tickingarea_type:
+    - match: \G\s+(add|remove_all|remove|list)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_time:
+    - match: \G(?=\s+query\s+(daytime|gametime|day){{end}})
+      set: [ end, command_time_type_2, keyword ]
+    - match: \G(?=\s+query{{end}})
+      set: [ incomplete, keyword ]
+    - match: \G(?=\s+set\s+(day|midnight|night|noon|sunrise|sunset){{end}})
+      set: [ end, command_time_type_1, keyword ]
+    - match: \G(?=\s+(add|set){{int}}{{end}})
+      set: [ end, int, keyword ]
+    - match: \G(?=\s+(add|set|query){{end}})
+      set: [ incomplete, keyword ]
+    - match: \G(?={{end}})
+      set: [ incomplete ]
+    - include: incomplete
+
+  command_time_type_1:
+    - match: \G\s+(day|midnight|night|noon|sunrise|sunset)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_time_type_2:
+    - match: \G\s+(daytime|gametime|day)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  command_title:
+    - match: \G(?={{selector}}\s+times{{end}})
+      set: [ end, whole, whole, whole, keyword, selector ]
+    - match: \G(?={{selector}}\s+(title|subtitle|actionbar){{end}})
+      set: [ end, string, keyword, selector ]
+    - match: \G(?={{selector}}\s+(clear|reset){{end}})
+      set: [ end, keyword, selector ]
+    - match: \G(?={{end}})
+      set: [ incomplete, selector ]
+    - include: incomplete
+
+  command_titleraw:
+    - include: command_title
+
+  command_toggledownfall:
+    - match: \G(?={{end}})
+      set: [ end ]
+    - include: incomplete
+
+  command_weather:
+    - match: \G(?=\s+query{{end}})
+      set: [ end, command_weather_type ]
+    - match: \G(?=\s+(clear|rain|thunder|query)\s{{end}})
+      set: [ end, int, command_weather_type ]
+    - match: \G(?={{end}})
+      set: [ end, command_weather_type ]
+    - include: incomplete
+    
+  command_weather_type:
+    - match: \G\s+(clear|rain|thunder|query)
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+    
+  command_xp:
+    - match: \G(?={{int}}[lL]\s{{end}})
+      set: [ end, selector, _keyword, int ]
+    - match: \G(?={{int}}\s{{end}})
+      set: [ end, selector, int ]
+    - match: \G(?={{int}}[lL]{{end}})
+      set: [ end, _keyword, int]
+    - match: \G(?={{end}})
+      set: [ end, int ]
+    - include: incomplete
+
+
+
+  bool:
+    - match: \G{{bool}}
+      scope: constant.language
+      pop: true
+    - include: incomplete
+
+  whole:
+    - match: \G{{whole}}
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  dv:
+    - match: \G{{dv}}
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  int:
+    - match: \G{{int}}
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  float:
+    - match: \G{{float}}
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  _keyword:
+    - match: \G[^ \n]+
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+
+  keyword:
+    - match: \G\s+[^ \n]+
+      scope: keyword.control
+      pop: true
+    - include: incomplete
+  
+  name:
+    - match: \G{{name}}
+      scope: string.unquoted
+      pop: true
+    - include: incomplete
+  
+  string:
+    - match: \G{{string}}
+      scope: string.unquoted
+      pop: true
+    - include: incomplete
+
+  selector:
+    - match: \G\s+@[aeprs](\[)
+      scope: punctuation.definition.keyword
+      captures:
+        1: punctuation.section.brackets.begin
+      set:
+        - match: \]
+          scope: punctuation.section.brackets.end
+          pop: true
+        - match: ",\\]"
+          scope: invalid.illegal
+          pop: true
+        - match: ","
+          scope: punctuation.separator.selector
+        - match: (type)(=!?)([a-z_:])
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: string.unquoted
+        - match: (name|tag)(=!?)([^,"\s=\]]+)
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: string.unquoted
+        - match: (name|tag)(=!?)(".*")
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: string.unquoted
+        - match: (m|l|lm)(=!?){{_whole}}
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: constant.numeric
+        - match: (c)(=!?){{int}}
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: constant.numeric
+        - match: (r|rm|x|y|z|dx|dy|dz|rx|rxm|ry|rym)(=){{_float}}
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: constant.numeric
+        - match: (scores)(=)({)
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: punctuation.section.braces.begin
+          push:
+            - match: "}"
+              scope: punctuation.section.braces.end
+              pop: true
+            - match: ",}"
+              scope: invalid.illegal
+              pop: true
+            - match: ","
+              scope: punctuation.separator.selector
+            - match: ([a-zA-Z_\-0-9]+)(=!?)(?:{{_int}}?(\.\.){{_int}}?|{{_int}})
+              captures:
+                1: string.unquoted
+                2: keyword.operator
+                3: constant.numeric
+                4: keyword.operator
+                5: constant.numeric
+                6: constant.numeric
+            - include: incomplete
+            - match: \s+
+        - include: incomplete
+        - match: \s+
+    - match: \G\s+@[aeprs]
+      scope: punctuation.definition.keyword
+      pop: true
+    - include: incomplete
+
+  coord:
+    - match: \G\s+(?:~{{_float}}|{{_float}}|~)
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
+
+  coords:
+    - match: \G\s+(?:(?:~{{_float}}|{{_float}}|~)\s+(?:~{{_float}}|{{_float}}|~)\s+(?:~{{_float}}|{{_float}}|~)|\^{{_float}}?\s+\^{{_float}}?\s+\^{{_float}}?)
+      scope: constant.numeric
+      pop: true
+    - include: incomplete
