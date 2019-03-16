@@ -261,12 +261,16 @@ contexts:
     - include: incomplete
 
   command_fill:
-    - match: \G(?={{coords}}{{coords}}{{coords}}{{name}}{{dv}}\s{{end}})
-      set: [ end, command_fill_type, dv, name, coords, coords, coords ]
-    - match: \G(?={{coords}}{{coords}}{{coords}}{{name}}\s{{end}})
-      set: [ end, dv, name, coords, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{name}}{{dv}}\s+replace{{name}}\s{{end}})
+      set: [ end, dv, name, command_fill_type, dv, name, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{name}}{{dv}}\s+replace\s{{end}})
+      set: [ end, name, command_fill_type, dv, name, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{name}}{{dv}}\s{{end}})
+      set: [ end, command_fill_type, dv, name, coords, coords ]
+    - match: \G(?={{coords}}{{coords}}{{name}}\s{{end}})
+      set: [ end, dv, name, coords, coords ]
     - match: \G(?={{end}})
-      set: [ end, name, coords, coords, coords ]
+      set: [ end, name, coords, coords ]
     - include: incomplete
 
   command_fill_type:
@@ -401,25 +405,32 @@ contexts:
     - match: \G(?=\s+objectives{{end}})
       set: [ incomplete, command_scoreboard_type_4, keyword ]
     - match: \G(?=\s+players\s+operation{{end}})
-      set: [ end, name, selector, command_scoreboard_type_3, name, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, name, command_scoreboard_fakeplayer, command_scoreboard_type_3, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+(add|remove|set){{end}})
-      set: [ end, int, name, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, int, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+random{{end}})
-      set: [ end, int, int, name, selector, command_scoreboard_type_1, keyword ]
-    - match: \G(?=\s+players\s+test{{selector}}{{name}}\s+(\*|{{_int}})\s+{{end}})
-      set: [ end, command_scoreboard_type_2, command_scoreboard_type_2, name, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, int, int, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+test({{selector}}|{{name}}){{name}}\s+(\*|{{_int}})\s+{{end}})
+      set: [ end, command_scoreboard_type_2, command_scoreboard_type_2, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+test{{end}})
-      set: [ end, command_scoreboard_type_2, name, selector, command_scoreboard_type_1, keyword ]
-    - match: \G(?=\s+players\s+reset{{selector}}\s{{end}})
-      set: [ end, name, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, command_scoreboard_type_2, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
+    - match: \G(?=\s+players\s+reset({{selector}}|{{name}})\s{{end}})
+      set: [ end, name, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+reset{{end}})
-      set: [ end, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+list\s+{{end}})
-      set: [ end, selector, command_scoreboard_type_1, keyword ]
+      set: [ end, command_scoreboard_fakeplayer, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players\s+list{{end}})
       set: [ end, command_scoreboard_type_1, keyword ]
     - match: \G(?=\s+players{{end}})
       set: [ incomplete, command_scoreboard_type_1, keyword ]
+    - include: incomplete
+
+  command_scoreboard_fakeplayer:
+    - include: _selector
+    - match: \G\s+[^ \n]+
+      scope: keyword.operator
+      pop: true
     - include: incomplete
 
   command_scoreboard_type_1:
@@ -727,7 +738,7 @@ contexts:
       pop: true
     - include: incomplete
 
-  selector:
+  _selector:
     - match: \s+@[aeprs](\[)
       scope: punctuation.definition.keyword
       captures:
@@ -741,7 +752,7 @@ contexts:
           pop: true
         - match: ','
           scope: punctuation.separator.selector
-        - match: (type)(=!?)([a-z_:]+)
+        - match: (type)(=!?)([a-z_:1-9]+)
           captures:
             1: keyword.control
             2: keyword.operator
@@ -800,6 +811,9 @@ contexts:
     - match: \s+@[aeprs]
       scope: punctuation.definition.keyword2
       pop: true
+
+  selector:
+    - include: _selector
     - include: incomplete
 
   coord:
