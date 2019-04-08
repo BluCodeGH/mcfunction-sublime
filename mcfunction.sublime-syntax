@@ -175,6 +175,11 @@ contexts:
       pop: true
 
   command_mandatory:
+    - match: \G\s(?={{end}})
+      set: [ command_mandatory_ ]
+    - include: incomplete
+
+  command_mandatory_:
     - include: command
     - include: incomplete
 
@@ -186,13 +191,13 @@ contexts:
     - include: incomplete
     
   command_clear:
-    - match: \G(?={{selector}}{{name}}{{dv}}.{{end}})
+    - match: \G(?={{selector}}{{name}}{{dv}}\s{{end}})
       set: [ end, dv, dv, name, selector ]
-    - match: \G(?={{selector}}{{name}}.{{end}})
+    - match: \G(?={{selector}}{{name}}\s{{end}})
       set: [ end, dv, name, selector ]
-    - match: \G(?={{selector}}.{{end}})
+    - match: \G(?={{selector}}\s{{end}})
       set: [ end, name, selector ]
-    - match: \G(?=.{{end}})
+    - match: \G(?=\s{{end}})
       set: [ end, selector ]
     - match: \G{{end}}
       pop: true
