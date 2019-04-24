@@ -259,9 +259,9 @@ contexts:
     - include: incomplete
 
   command_execute:
-    - match: \G(?={{selector}}{{coords}}\s+detect{{end}})
+    - match: (?={{selector}}{{coords}}\s+detect{{end}})
       set: [ command_mandatory, dv, name, coords, keyword, coords, selector ]
-    - match: \G(?=.{{end}})
+    - match: \G(?={{end}})
       set: [ command_mandatory, coords, selector ]
     - include: incomplete
 
