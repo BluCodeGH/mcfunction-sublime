@@ -18,7 +18,8 @@ variables:
   name: \s+([^ \n]++)
   string: \s+.+
   selector: \s+(@[aeprs](?:\[[^\]]*\])?+)
-  coord: \s+(~|~[+-]?\d+(?:\.\d+)?|[+-]?\d+(?:\.\d+)?)
+  _coord: (~[+-]?\d+(?:\.\d+)?|~|[+-]?\d+(?:\.\d+)?)
+  coord: \s+{{_coord}}
   coords: (?:\s+(\^?~?(?:[+-]?\d+(?:\.\d+)?)?)){3}
   start: (?:\G|^|\s+)
   end: .*\n
@@ -757,37 +758,42 @@ contexts:
           pop: true
         - match: ','
           scope: punctuation.separator.selector
-        - match: (type)(=!?)([a-z_:1-9]+)
+        - match: (type)(=!?)([a-z_:1-9]+)(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: string.unquoted
-        - match: (name|tag)(=!?)([^,'\s=\]]+)
+        - match: (name|tag)(=!?)([^,'\s=\]]+)(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: string.unquoted
-        - match: (name|tag)(=!?)('.*')
+        - match: (name|tag)(=!?)('.*')(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: string.unquoted
-        - match: (m|l|lm)(=!?){{_whole}}
+        - match: (m|l|lm)(=!?){{_whole}}(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: constant.numeric
-        - match: (c)(=!?){{_int}}
+        - match: (c)(=!?){{_int}}(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: constant.numeric
-        - match: (r|rm|x|y|z|dx|dy|dz|rx|rxm|ry|rym)(=){{_float}}
+        - match: (r|rm|dx|dy|dz|rx|rxm|ry|rym)(=){{_float}}(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
             3: constant.numeric
-        - match: (scores)(=)({)
+        - match: (x|y|z)(=){{_coord}}(?=,|\])
+          captures:
+            1: keyword.control
+            2: keyword.operator
+            3: constant.numeric
+        - match: (scores)(=)({)(?=,|\])
           captures:
             1: keyword.control
             2: keyword.operator
@@ -801,7 +807,7 @@ contexts:
               pop: true
             - match: ','
               scope: punctuation.separator.selector
-            - match: ([a-zA-Z_\-0-9]+)(=!?)(?:{{_int}}?(\.\.){{_int}}?|{{_int}})
+            - match: ([a-zA-Z_\-0-9]+)(=!?)(?:{{_int}}?(\.\.){{_int}}?|{{_int}})(?=,|})
               captures:
                 1: string.unquoted
                 2: keyword.operator

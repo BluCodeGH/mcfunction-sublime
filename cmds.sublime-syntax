@@ -10,11 +10,12 @@ contexts:
       captures:
         1: comment.line
         2: punctuation.definition.comment
-    - match: \G\s+(-?\??-?)(?:(.*?)(\|))?
+    - match: \G\s+(\?-|-\?|-?\??)(?:([^|]{,15})(.*?)(\|))?
       captures:
         1: keyword.operator
         2: string.unquoted
-        3: keyword.operator
+        3: invalid.illegal
+        4: keyword.operator
       embed: Packages/mcfunction-sublime/mcfunction.sublime-syntax
       escape: \z
     - match: \G([RIC])((?:\s+~?[+-]?\d*(?:\.\d+)?){3})\s+(u|d|\+x|\+z|-x|-z)
