@@ -1,0 +1,79 @@
+%YAML 1.2
+---
+name: MCJSON
+file_extensions: [mcj]
+scope: source
+
+contexts:
+  main:
+    - match: '- (?=".+"\n)'
+      scope: punctuation.separator
+      push: value
+    - match: '- (?=[^ ]+\n)'
+      scope: punctuation.separator
+      push: value
+    - match: "- "
+      scope: punctuation
+    - match: (?=[{\[].+[}\]])
+      push: value
+    - match: \d+(.\d+)? (?=.)
+      scope: constant.numeric
+      push: value
+    - match: ([^ .:]+) (?=.)
+      scope: entity.name.tag
+      push: value
+    - match: \d+(.\d+)?
+      scope: constant.numeric
+    - match: "[^ .:]+"
+      scope: entity.name.tag
+    - match: "\\.|:"
+      scope: punctuation.separator
+  value:
+    - match: true\n|false\n
+      scope: constant.language
+      pop: true
+    - match: \d+(.\d+)?\n
+      scope: constant.numeric
+      pop: true
+    - match: '"?/'
+      scope: punctuation.separator
+      set: Packages/mcfunction-sublime/mcfunction.sublime-syntax
+      with_prototype:
+        - match: '"?$'
+          scope: punctuation.separator
+          pop: true
+    - match: (")(variable)
+      captures:
+        1: punctuation.separator
+        2: keyword.language
+      set: Packages/C++/C.sublime-syntax
+      with_prototype:
+        - match: variable|query|[mM]ath
+          scope: keyword.language
+        - match: '"?$'
+          scope: punctuation.separator
+          pop: true
+    - match: ([{\[])(?=.+[}\]])
+      captures:
+        1: punctuation.separator
+      set:
+        - match: ([^ ,]+) (\d+(.\d+)?)
+          captures:
+            1: entity.name.tag
+            2: constant.numeric
+        - match: ([^ ,]+) ([^ ,]+)
+          captures:
+            1: entity.name.tag
+            2: string.unquoted
+        - match: ','
+          scope: punctuation.separator
+        - match: '[}\]]'
+          scope: punctuation.separator
+          pop: true
+    - match: (")?([^"]*)(")?\n
+      captures:
+        1: punctuation.separator
+        2: string.quoted.single
+        3: punctuation.separator
+      pop: true
+

@@ -15,7 +15,7 @@ variables:
   _float: ([+-]?\d+(?:\.\d+)?)
   float: \s+{{_float}}
   block: \s+([a-z_]+)
-  name: \s+([^ \n]++)
+  name: \s+([^ \n"]++)
   string: \s+.+
   selector: \s+(@[aeprs](?:\[[^\]]*\])?+)
   _coord: (~[+-]?\d+(?:\.\d+)?|~|[+-]?\d+(?:\.\d+)?)
@@ -500,6 +500,8 @@ contexts:
     - include: incomplete
 
   command_summon:
+    - match: \G(?={{name}}{{coords}}\s{{end}})
+      set: [ end, name, coords, name ]
     - match: \G(?={{name}}\s{{end}})
       set: [ end, coords, name ]
     - match: \G(?={{end}})
@@ -793,7 +795,7 @@ contexts:
             1: keyword.control
             2: keyword.operator
             3: constant.numeric
-        - match: (scores)(=)({)(?=,|\])
+        - match: (scores)(=)({)
           captures:
             1: keyword.control
             2: keyword.operator
